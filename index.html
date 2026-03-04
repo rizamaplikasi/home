@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RyzzCV - Super Fast Singapore Server</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #00b894;
+            --accent: #6c5ce7;
+            --dark: #2d3436;
+            --light-bg: #f4f7f6;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--light-bg);
+            margin: 0;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+
+        /* --- Navbar --- */
+        .navbar {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        .logo { font-size: 22px; font-weight: 800; color: var(--dark); text-decoration: none; }
+        .logo span { color: var(--primary); }
+
+        .nav-actions { display: flex; gap: 15px; }
+        .nav-btn { background: none; border: none; font-size: 18px; color: var(--dark); cursor: pointer; transition: 0.3s; }
+        .nav-btn:hover { color: var(--primary); transform: scale(1.1); }
+
+        /* --- Global Search --- */
+        .search-overlay {
+            display: none;
+            padding: 15px 25px;
+            background: white;
+            border-bottom: 2px solid var(--primary);
+            animation: slideDown 0.2s ease;
+        }
+        .search-overlay.active { display: block; }
+        .search-input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        /* --- Dropdown Menu --- */
+        .menu-box {
+            position: absolute;
+            top: 75px;
+            right: 25px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+            width: 200px;
+            display: none;
+            overflow: hidden;
+            z-index: 1001;
+        }
+        .menu-box.active { display: block; animation: fadeIn 0.2s ease; }
+        .menu-box a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: 0.2s;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .menu-box a:hover { background: #f0fdfa; color: var(--primary); }
+
+        /* --- Content Layout --- */
+        .main-content { padding: 20px; max-width: 600px; margin: 0 auto; min-height: 80vh; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+        /* --- UI Components --- */
+        .card {
+            background: white;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); }
+
+        .news-footer {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+        }
+        .like-btn {
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #999;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            transition: 0.2s;
+            font-family: inherit;
+            font-weight: 600;
+        }
+        .like-btn.liked { color: #e74c3c; }
+        .like-btn.liked i { animation: heartPop 0.3s ease; }
+
+        .promo-item { display: flex; align-items: center; padding: 15px; gap: 15px; cursor: pointer; }
+        .app-icon-img { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; background: #eee; }
+        .app-icon-placeholder { width: 55px; height: 55px; border-radius: 12px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        .detail-header { text-align: center; padding: 20px 0; }
+        .detail-hero-img { width: 100px; height: 100px; border-radius: 25px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-action { border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; text-decoration: none; }
+        .btn-buy { background: var(--primary); color: white; }
+        .btn-dl { background: #f0fdfa; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-back { background: none; border: none; color: #999; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 5px; font-family: inherit; font-size: 15px;}
+
+        .profile-hero { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
+
+        .wa-float { position: fixed; bottom: 25px; right: 25px; background: #25d366; color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 25px; box-shadow: 0 8px 20px rgba(37,211,102,0.3); text-decoration: none; z-index: 1000; }
+
+        @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
+        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="#" class="logo" onclick="switchPage('home')">Ryzz<span>CV</span></a>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="toggleSearch()"><i class="fas fa-search"></i></button>
+            <button class="nav-btn" onclick="toggleMenu()"><i class="fas fa-th-large"></i></button>
+        </div>
+
+        <div class="menu-box" id="menuBox">
+            <a onclick="switchPage('home')"><i class="fas fa-home"></i> Home</a>
+            <a onclick="switchPage('promo')"><i class="fas fa-rocket"></i> Promosi</a>
+            <a onclick="switchPage('profile')"><i class="fas fa-id-card"></i> Kontak</a>
+        </div>
+    </nav>
+
+    <div class="search-overlay" id="searchOverlay">
+        <input type="text" id="globalInput" class="search-input" placeholder="Cari di halaman aktif..." onkeyup="globalSearch()">
+    </div>
+
+    <div class="main-content">
+        <div id="home" class="page active">
+            <h4 class="page-title">Berita Terbaru</h4>
+            <div id="news-container"><p style="text-align:center; color:#999;">Memuat berita...</p></div>
+        </div>
+
+        <div id="promo" class="page">
+            <h4 class="page-title">Promosi Aplikasi</h4>
+            <div id="promo-container"></div>
+        </div>
+
+        <div id="details" class="page">
+            <button class="btn-back" onclick="switchPage('promo')"><i class="fas fa-arrow-left"></i> Kembali</button>
+            <div id="detail-content"></div>
+        </div>
+
+        <div id="profile" class="page">
+            <div class="profile-hero searchable">
+                <div style="width:80px; height:80px; background:white; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:30px;"><i class="fas fa-user"></i></div>
+                <h2 id="disp-name">Fathur Rizam</h2>
+                <p id="disp-bio" style="margin:5px 0 0 0; opacity:0.8;">Owner & Developer RyzzCV</p>
+            </div>
+            <div class="card searchable" style="padding:20px;">
+                <h4 style="margin-top:0">Informasi Kontak</h4>
+                <p id="disp-email"><strong>Email:</strong> rizam.explore1000@yahoo.com</p>
+                <p><strong>Ungkapan:</strong> Terima Kasih Banyak buat kalian semua</p>
+                <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+                <p style="font-size: 13px; color: #888;">Secured by RyzzCV</p>
+            </div>
+        </div>
+
+        <div id="no-result" style="display:none; text-align:center; padding:50px 20px; color:#999;">
+            <i class="fas fa-search" style="font-size:40px; margin-bottom:15px;"></i>
+            <p>Tidak ditemukan hasil di tab ini.</p>
+        </div>
+    </div>
+
+    <a href="https://wa.me/6285608906983" target="_blank" class="wa-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // --- KONFIGURASI DATABASE SINGAPURA BARU ---
+        const firebaseConfig = { 
+            databaseURL: "https://webs-48c55-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 1. Navigasi & Search (Anti-Tumpuk) ---
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if(target) target.classList.add('active');
+
+            document.getElementById('menuBox').classList.remove('active');
+            document.getElementById('searchOverlay').classList.remove('active');
+            document.getElementById('globalInput').value = "";
+            document.getElementById('no-result').style.display = "none";
+            document.querySelectorAll('.searchable').forEach(el => el.style.display = "");
+            window.scrollTo(0,0);
+        }
+
+        function toggleSearch() {
+            const s = document.getElementById('searchOverlay');
+            s.classList.toggle('active');
+            if(s.classList.contains('active')) document.getElementById('globalInput').focus();
+        }
+
+        function toggleMenu() { document.getElementById('menuBox').classList.toggle('active'); }
+
+        function globalSearch() {
+            const input = document.getElementById('globalInput').value.toLowerCase();
+            const currentPage = document.querySelector('.page.active');
+            const elements = currentPage.querySelectorAll('.searchable');
+            let found = false;
+
+            if(input === "") {
+                elements.forEach(el => el.style.display = "");
+                document.getElementById('no-result').style.display = "none";
+                return;
+            }
+
+            elements.forEach(el => {
+                if(el.innerText.toLowerCase().includes(input)) {
+                    el.style.display = "";
+                    found = true;
+                } else {
+                    el.style.display = "none";
+                }
+            });
+            document.getElementById('no-result').style.display = found ? "none" : "block";
+        }
+
+        // --- 2. Parallel Fast Loading ---
+        function fastInit() {
+            const tasks = [
+                db.ref("berita").once("value"),
+                db.ref("promosi").once("value"),
+                db.ref("profil").once("value")
+            ];
+
+            Promise.all(tasks).then(snapshots => {
+                // Berita
+                const newsData = snapshots[0].val();
+                const nContainer = document.getElementById("news-container");
+                if(newsData) {
+                    nContainer.innerHTML = Object.keys(newsData).map(id => createNewsHTML(id, newsData[id])).join('');
+                } else {
+                    nContainer.innerHTML = "<p style='text-align:center;color:#999;padding:20px;'>Belum ada berita di database baru.</p>";
+                }
+
+                // Promosi
+                const promoData = snapshots[1].val();
+                const pContainer = document.getElementById("promo-container");
+                if(promoData) {
+                    pContainer.innerHTML = Object.keys(promoData).map(id => createPromoHTML(id, promoData[id])).join('');
+                }
+
+                // Profil
+                const p = snapshots[2].val();
+                if(p) {
+                    document.getElementById("disp-name").innerText = p.nama || "Fathur Rizam";
+                    document.getElementById("disp-bio").innerText = p.bio || "Developer RyzzCV";
+                    document.getElementById("disp-email").innerHTML = `<strong>Email:</strong> ${p.email || 'Belum diatur'}`;
+                }
+            });
+        }
+
+        function createNewsHTML(id, item) {
+            const isLiked = localStorage.getItem('liked_' + id);
+            return `
+                <div class="card news-item searchable" id="news-card-${id}">
+                    <div style="height:180px; background: url('${item.img || 'https://via.placeholder.com/600x300'}') center/cover;"></div>
+                    <div style="padding:15px;">
+                        <h3 style="margin:0 0 10px 0;">${item.judul}</h3>
+                        <small>Kategori: ${item.kategori}</small>
+                    </div>
+                    <div class="news-footer">
+                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="handleLike('${id}')">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> 
+                            <span id="lcount-${id}">${item.likes || 0} Like</span>
+                        </button>
+                    </div>
+                </div>`;
+        }
+
+        function createPromoHTML(id, app) {
+            const appIcon = app.img 
+                ? `<img src="${app.img}" class="app-icon-img" loading="eager">` 
+                : `<div class="app-icon-placeholder"><i class="${app.icon || 'fas fa-box'}"></i></div>`;
+            return `
+                <div class="card promo-item searchable" onclick="showAppDetail('${id}')">
+                    ${appIcon}
+                    <div style="flex:1">
+                        <h3 style="margin:0; font-size:16px;">${app.nama}</h3>
+                        <small>${app.desc ? app.desc.substring(0, 35) : 'Premium App'}...</small>
+                    </div>
+                    <button style="border:none; background:var(--primary); color:white; padding:8px 12px; border-radius:8px; cursor:pointer;">Detail</button>
+                </div>`;
+        }
+
+        // --- 3. Interaction Logic ---
+        function handleLike(id) {
+            if(localStorage.getItem('liked_' + id)) return;
+            const label = document.getElementById(`lcount-${id}`);
+            const btn = document.querySelector(`#news-card-${id} .like-btn`);
+            
+            label.innerText = (parseInt(label.innerText) + 1) + " Like";
+            btn.classList.add('liked');
+            btn.querySelector('i').className = 'fas fa-heart';
+            
+            db.ref('berita/' + id + '/likes').transaction(c => (c || 0) + 1);
+            localStorage.setItem('liked_' + id, 'true');
+        }
+
+        function showAppDetail(appId) {
+            db.ref("promosi/" + appId).once("value", (snapshot) => {
+                const app = snapshot.val();
+                if(app) {
+                    const detailIcon = app.img 
+                        ? `<img src="${app.img}" class="detail-hero-img" loading="eager">`
+                        : `<div class="app-icon-placeholder" style="width:100px; height:100px; font-size:40px; margin: 0 auto 15px;"><i class="${app.icon || 'fas fa-box'}"></i></div>`;
+                    
+                    document.getElementById("detail-content").innerHTML = `
+                        <div class="detail-header">
+                            ${detailIcon}
+                            <h2 style="margin:0">${app.nama}</h2>
+                            <p style="color:var(--primary); font-weight:700;">Premium Service</p>
+                        </div>
+                        <div class="card" style="padding:20px;">
+                            <h4 style="margin-top:0">Deskripsi Produk</h4>
+                            <p style="line-height:1.6; color:#555;">${app.desc || 'Deskripsi tidak tersedia.'}</p>
+                            <div class="btn-group">
+                                <a href="https://wa.me/6285608906983?text=Halo Fathur, saya ingin pesan ${app.nama}" target="_blank" class="btn-action btn-buy"><i class="fab fa-whatsapp"></i> Beli</a>
+                                <a href="${app.link || '#'}" target="_blank" class="btn-action btn-dl"><i class="fas fa-download"></i> Download</a>
+                            </div>
+                        </div>`;
+                    switchPage('details');
+                }
+            });
+        }
+
+        fastInit();
+
+        window.onclick = function(e) {
+            if (!e.target.closest('.nav-actions') && !e.target.closest('.menu-box')) {
+                document.getElementById('menuBox').classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
