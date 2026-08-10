@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RyzzCyber - Modifider Aplikasi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">    
+    <style>
+    /* =========================================
+       1. ROOT VARIABLES (iOS Color Palette & Springs)
+       ========================================= */
+    :root {
+        --primary: #007AFF; /* iOS Blue */
+        --primary-gradient: linear-gradient(135deg, #007AFF, #005bb5);
+        --accent: #5856D6;
+        --dark: #1C1C1E;
+        --gray: #8E8E93;
+        --bg-color: #F2F2F7;
+        
+        /* Liquid Glass Properties */
+        --glass-bg: rgba(255, 255, 255, 0.65);
+        --glass-border: rgba(255, 255, 255, 0.5);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+        --glass-blur: blur(24px) saturate(180%);
+        
+        /* Bouncy Animations */
+        --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        --spring-soft: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent !important;
+        outline: none !important;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: radial-gradient(circle at top left, #e0f2fe 0%, #F2F2F7 50%, #eef2ff 100%);
+        background-attachment: fixed;
+        margin: 0;
+        color: var(--dark);
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+    }
+
+    /* =========================================
+       2. REUSABLE GLASSMORPHISM CLASSES
+       ========================================= */
+    .glass-panel {
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+    }
+
+    /* =========================================
+       3. NAVBAR & MENU
+       ========================================= */
+    .navbar {
+        margin: 15px 20px;
+        padding: 12px 20px;
+        border-radius: 99px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 15px;
+        z-index: 1000;
+        transition: all 0.4s var(--spring-soft);
+    }
+
+    .logo { 
+        font-size: 20px; 
+        font-weight: 800; 
+        color: var(--dark); 
+        text-decoration: none; 
+        letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--primary); }
+
+    .nav-actions { display: flex; gap: 10px; }
+    
+    .nav-btn { 
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        font-size: 16px; 
+        color: var(--dark); 
+        cursor: pointer; 
+        transition: all 0.3s var(--spring); 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-btn:hover { transform: scale(1.08); background: #fff; }
+    .nav-btn:active, .btn-action:active, .like-btn:active, .promo-item button:active { 
+        transform: scale(0.92) !important; 
+        opacity: 0.8;
+    }
+
+    /* Search Overlay */
+    .search-overlay {
+        position: fixed;
+        top: 80px;
+        left: 20px;
+        right: 20px;
+        border-radius: 20px;
+        padding: 15px;
+        z-index: 999;
+        visibility: hidden;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.4s var(--spring);
+    }
+    .search-overlay.active { 
+        visibility: visible;
+        pointer-events: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 14px 20px;
+        border: none;
+        border-radius: 12px;
+        background: rgba(255,255,255,0.9);
+        font-size: 16px;
+        font-family: inherit;
+        font-weight: 500;
+        box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    /* Dropdown Menu */
+    .menu-box {
+        position: absolute;
+        top: 75px;
+        right: 20px;
+        border-radius: 24px;
+        width: 220px;
+        overflow: hidden;
+        z-index: 1001;
+        padding: 10px;
+        visibility: hidden;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-15px) scale(0.9);
+        transform-origin: top right;
+        transition: all 0.4s var(--spring);
+    }
+    .menu-box.active { 
+        visibility: visible;
+        pointer-events: auto;
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+    }
+    
+    .menu-box a {
+        display: flex;
+        align-items: center;
+        padding: 14px 18px;
+        text-decoration: none;
+        color: var(--dark);
+        font-weight: 600;
+        font-size: 15px;
+        border-radius: 16px;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+        gap: 14px;
+        cursor: pointer;
+    }
+    .menu-box a i { font-size: 18px; color: var(--primary); width: 24px; text-align: center; }
+    .menu-box a:hover { background: rgba(0, 122, 255, 0.1); color: var(--primary); transform: translateX(5px); }
+
+    /* =========================================
+       4. MAIN LAYOUT & CARDS
+       ========================================= */
+    .main-content { padding: 20px; max-width: 600px; margin: 0 auto; min-height: 80vh; }
+    
+    .page-title {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 20px;
+        color: var(--dark);
+    }
+
+    .page { display: none; }
+    .page.active { 
+        display: block; 
+        animation: pageEnter 0.5s var(--spring) forwards;
+    }
+
+    .card {
+        border-radius: 24px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        transition: all 0.4s var(--spring);
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.08); }
+
+    /* =========================================
+       5. NEWS & ITEMS UI
+       ========================================= */
+    .news-footer {
+        padding: 12px 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        background: rgba(255,255,255,0.3);
+    }
+    
+    .like-btn {
+        border: none;
+        background: rgba(255,255,255,0.7);
+        padding: 10px 16px;
+        border-radius: 99px;
+        cursor: pointer;
+        color: var(--gray);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s var(--spring);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+    .like-btn.liked { color: #FF3B30; background: rgba(255, 59, 48, 0.1); }
+    .like-btn.liked i { animation: heartPop 0.4s var(--spring); }
+
+    .promo-item { 
+        display: flex; 
+        align-items: center; 
+        padding: 16px; 
+        gap: 16px; 
+        cursor: pointer; 
+    }
+    .app-icon-img { 
+        width: 60px; height: 60px; 
+        border-radius: 16px; 
+        object-fit: cover; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+    }
+    
+    /* =========================================
+       6. BUTTONS & ACTIONS
+       ========================================= */
+    .btn-action { 
+        border: none; 
+        padding: 16px; 
+        border-radius: 18px; 
+        font-weight: 700; 
+        font-size: 15px;
+        cursor: pointer; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        gap: 8px; 
+        transition: all 0.3s var(--spring); 
+        text-decoration: none; 
+    }
+    
+    .btn-buy { 
+        background: var(--primary-gradient); 
+        color: white; 
+        box-shadow: 0 8px 20px rgba(0, 122, 255, 0.3); 
+    }
+    
+    .btn-dl { 
+        background: rgba(0, 122, 255, 0.1); 
+        color: var(--primary); 
+    }
+
+    .btn-back { 
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border: 1px solid var(--glass-border);
+        color: var(--dark); 
+        cursor: pointer; 
+        margin-bottom: 20px; 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 8px; 
+        font-family: inherit; 
+        font-weight: 600;
+        font-size: 15px;
+        padding: 12px 20px;
+        border-radius: 99px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        transition: all 0.3s var(--spring);
+    }
+
+    /* =========================================
+       7. PROFILE HERO
+       ========================================= */
+    .profile-hero { 
+        background: var(--primary-gradient);
+        color: white; 
+        padding: 40px 20px; 
+        border-radius: 32px; 
+        text-align: center; 
+        margin-bottom: 20px; 
+        box-shadow: 0 15px 35px rgba(0, 122, 255, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+        animation: rotateGlow 15s linear infinite;
+    }
+
+    /* =========================================
+       8. MODALS & COMMENTS (iOS Bottom Sheet Style)
+       ========================================= */
+    .modal-overlay {
+        display: none; 
+        position: fixed; 
+        top: 0; left: 0; 
+        width: 100%; height: 100%; 
+        z-index: 9999; 
+        flex-direction: column;
+        background: rgba(0,0,0,0.4) !important;
+        backdrop-filter: blur(5px);
+        padding-top: 10vh; 
+        transition: opacity 0.3s;
+    }
+    
+    .modal-content-glass {
+        background: var(--glass-bg);
+        backdrop-filter: var(--glass-blur);
+        border-radius: 32px 32px 0 0;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        animation: slideUpSheet 0.4s var(--spring);
+    }
+
+    .comment-bubble {
+        padding: 14px 18px;
+        background: rgba(255,255,255,0.8);
+        border: 1px solid rgba(255,255,255,0.9);
+        border-radius: 20px 20px 20px 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        max-width: 85%;
+        align-self: flex-start;
+        font-size: 14px;
+        line-height: 1.5;
+        transition: transform 0.2s;
+    }
+    .comment-bubble strong {
+        color: var(--primary);
+        font-size: 13px;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    /* =========================================
+       9. FLOATING BUTTONS (WA & AI)
+       ========================================= */
+    .wa-float { 
+        position: fixed; bottom: 30px; right: 30px; 
+        background: #34C759; /* iOS Green */
+        color: white; width: 60px; height: 60px; 
+        border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+        font-size: 28px; box-shadow: 0 10px 25px rgba(52, 199, 89, 0.4); 
+        text-decoration: none; z-index: 1000;
+        transition: all 0.3s var(--spring);
+    }
+    .wa-float:hover { transform: scale(1.1); }
+    .wa-float:active { transform: scale(0.9); }
+
+    /* Floating AI CS Button */
+    .ai-float { 
+        position: fixed; bottom: 105px; right: 30px; 
+        background: var(--primary-gradient); 
+        color: white; width: 60px; height: 60px; 
+        border-radius: 50%; display: flex; justify-content: center; align-items: center; 
+        font-size: 24px; box-shadow: 0 10px 25px rgba(0, 122, 255, 0.4); 
+        text-decoration: none; z-index: 1000;
+        transition: all 0.3s var(--spring);
+        border: none; cursor: pointer;
+    }
+    .ai-float:hover { transform: scale(1.1); }
+    .ai-float:active { transform: scale(0.9); }
+
+    /* AI Chat Bubbles */
+    .ai-bubble {
+        padding: 14px 18px;
+        border-radius: 20px;
+        max-width: 85%;
+        font-size: 14px;
+        line-height: 1.5;
+        animation: pageEnter 0.3s var(--spring);
+        white-space: pre-wrap;
+    }
+    .ai-bubble.bot {
+        background: rgba(255,255,255,0.8);
+        border: 1px solid rgba(255,255,255,0.9);
+        color: var(--dark);
+        align-self: flex-start;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .ai-bubble.user {
+        background: var(--primary);
+        color: white;
+        align-self: flex-end;
+        border-bottom-right-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+    }
+
+    .footer-copyright {
+        color: var(--gray);
+        text-align: center;
+        padding: 20px;
+        margin-top: 60px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    @keyframes pageEnter {
+        0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes slideUpSheet { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+    @keyframes heartPop { 0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1); } }
+    @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR GLASS -->
+    <nav class="navbar glass-panel">
+        <a href="#" class="logo" onclick="switchPage('home')">Ryzz<span>Cyber</span></a>
+        <div class="nav-actions">
+            <button class="nav-btn" onclick="toggleSearch()"><i class="fas fa-search"></i></button>
+            <button class="nav-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+
+        <div class="menu-box glass-panel" id="menuBox">
+            <a onclick="switchPage('home')"><i class="fas fa-home"></i> Beranda</a>
+            <a onclick="switchPage('promo')"><i class="fas fa-box-open"></i> Aplikasi</a>
+            <a onclick="switchPage('film')"><i class="fas fa-film"></i> Koleksi Film</a>
+            <a onclick="switchPage('profile')"><i class="fas fa-id-badge"></i> Kontak</a>
+        </div>
+    </nav>
+
+    <!-- SEARCH OVERLAY GLASS -->
+    <div class="search-overlay glass-panel" id="searchOverlay">
+        <input type="text" id="globalInput" class="search-input" placeholder="Cari sesuatu..." onkeyup="globalSearch()">
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- Halaman Berita -->
+        <div id="home" class="page active">
+            <h4 class="page-title">Terbaru untuk Anda</h4>
+            <div id="news-container"><p style="text-align:center; color:var(--gray);">Memuat konten...</p></div>
+        </div>
+
+        <!-- Halaman Promo Aplikasi -->
+        <div id="promo" class="page">
+            <h4 class="page-title">Aplikasi Premium</h4>
+            <div id="promo-container"></div>
+        </div>
+        
+        <!-- Halaman Detail Aplikasi -->
+        <div id="details" class="page">
+            <button class="btn-back" onclick="switchPage('promo')"><i class="fas fa-chevron-left"></i> Kembali</button>
+            <div id="detail-content"></div>
+        </div>
+
+        <!-- Halaman Folder Film -->
+        <div id="film" class="page">
+            <h4 class="page-title">Koleksi Film</h4>
+            <div id="film-container"><p style="text-align:center; color:var(--gray);">Memuat film...</p></div>
+        </div>
+
+        <!-- Halaman Detail/Episode Film -->
+        <div id="film-details" class="page">
+            <button class="btn-back" onclick="switchPage('film')"><i class="fas fa-chevron-left"></i> Kembali</button>
+            <div id="film-detail-content"></div>
+        </div>
+
+        <!-- Halaman Profil/Kontak -->
+        <div id="profile" class="page">
+            <div class="profile-hero searchable">
+                <div style="width:90px; height:90px; background:white; border-radius:50%; margin:0 auto 15px; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:35px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 2; position: relative;">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 id="disp-name" style="margin:0; font-weight:800; z-index: 2; position: relative;">Prof. Dr.Tech Fathur Rizam</h2>
+                <p id="disp-bio" style="margin:8px 0 0 0; opacity:0.9; font-weight:500; z-index: 2; position: relative;">Owner RyzzCV</p>
+            </div>
+            
+            <div class="card glass-panel searchable" style="padding:25px;">
+                <h4 style="margin-top:0; font-size: 18px; color:var(--dark);">Informasi Kontak</h4>
+                <p id="disp-email" style="font-size: 15px; color:#444;"><strong>Email:</strong> rizam.explore1000@yahoo.com</p>
+                <p style="font-size: 15px; color:#444; line-height: 1.6;"><strong>Pesan:</strong> Terima kasih banyak atas dukungan kalian semua.</p>
+                <hr style="border:0; border-top:1px solid rgba(0,0,0,0.05); margin:20px 0;">
+                <p style="font-size: 13px; color: var(--gray); text-align: center; margin:0;">Secured by RyzzCV Enterprise</p>
+            </div>
+        </div>
+
+        <!-- No Results State -->
+        <div id="no-result" style="display:none; text-align:center; padding:60px 20px; color:var(--gray);">
+            <i class="fas fa-search-minus" style="font-size:45px; margin-bottom:20px; opacity: 0.5;"></i>
+            <p style="font-weight: 500;">Tidak ada hasil di halaman ini.</p>
+        </div>
+    </div>
+
+    <!-- Floating Buttons -->
+    <button class="ai-float" onclick="toggleAIChat()">
+        <i class="fas fa-robot"></i>
+    </button>
+
+    <a href="https://wa.me/6285608906983" target="_blank" class="wa-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- Modal Komentar -->
+    <div id="commentModal" class="modal-overlay">
+        <div class="modal-content-glass" style="flex:1;">
+            <div style="padding:20px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:space-between;">
+                <h3 style="margin:0; font-size:18px; font-weight:700;">Komentar</h3>
+                <button onclick="document.getElementById('commentModal').style.display='none'" style="border:none; background:rgba(0,0,0,0.05); width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--dark);"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="comment-list" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px;"></div>
+            
+            <div style="padding:15px 20px 30px; background:rgba(255,255,255,0.6); border-top:1px solid rgba(0,0,0,0.05); display:flex; gap:10px; align-items:center;">
+                <input type="text" id="username" placeholder="Nama..." style="width:30%; padding:14px; border:none; border-radius:14px; outline:none; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-family:inherit; font-weight:500;">
+                <input type="text" id="commentText" placeholder="Tulis komentar..." style="flex:1; padding:14px; border:none; border-radius:14px; outline:none; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-family:inherit;">
+                <button id="sendCommentBtn" style="border:none; background:var(--primary); color:white; width:48px; height:48px; border-radius:14px; cursor:pointer; box-shadow:0 4px 12px rgba(0,122,255,0.3); transition:all 0.2s;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chat AI -->
+    <div id="aiChatModal" class="modal-overlay">
+        <div class="modal-content-glass" style="flex:1;">
+            <div style="padding:20px; border-bottom:1px solid rgba(0,0,0,0.05); display:flex; align-items:center; justify-content:space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 36px; height: 36px; background: var(--primary-gradient); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin:0; font-size:16px; font-weight:700;">Ryzz AI</h3>
+                        <small style="color:var(--primary); font-weight:600; font-size:12px;">Online - Customer Service</small>
+                    </div>
+                </div>
+                <button onclick="toggleAIChat()" style="border:none; background:rgba(0,0,0,0.05); width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--dark);"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div id="ai-chat-list" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px;">
+                <div class="ai-bubble bot">Halo! Saya asisten AI Ryzz Cyber. Ada yang bisa saya bantu terkait aplikasi atau layanan kami?</div>
+            </div>
+            
+            <div style="padding:15px 20px 30px; background:rgba(255,255,255,0.6); border-top:1px solid rgba(0,0,0,0.05); display:flex; gap:10px; align-items:center;">
+                <input type="text" id="aiInput" placeholder="Tanya AI di sini..." style="flex:1; padding:14px 20px; border:none; border-radius:20px; outline:none; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.04); font-family:inherit; font-size:15px;" autocomplete="off">
+                <button onclick="sendAIMessage()" style="border:none; background:var(--primary-gradient); color:white; width:48px; height:48px; border-radius:18px; cursor:pointer; box-shadow:0 4px 12px rgba(0,122,255,0.3); transition:all 0.2s;">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="footer-copyright">
+        <p>&copy; 2026 Secured by <strong>RyzzCV</strong></p>
+    </footer>
+
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = { 
+            databaseURL: "https://webs-48c55-default-rtdb.asia-southeast1.firebasedatabase.app/" 
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- 1. Navigasi & Search ---
+        function switchPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const target = document.getElementById(pageId);
+            if(target) target.classList.add('active');
+
+            document.getElementById('menuBox').classList.remove('active');
+            document.getElementById('searchOverlay').classList.remove('active');
+            document.getElementById('globalInput').value = "";
+            document.getElementById('no-result').style.display = "none";
+            document.querySelectorAll('.searchable').forEach(el => el.style.display = "");
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleSearch() {
+            const s = document.getElementById('searchOverlay');
+            s.classList.toggle('active');
+            if(s.classList.contains('active')) {
+                setTimeout(() => document.getElementById('globalInput').focus(), 100);
+            }
+        }
+
+        function toggleMenu() { document.getElementById('menuBox').classList.toggle('active'); }
+
+        function globalSearch() {
+            const input = document.getElementById('globalInput').value.toLowerCase();
+            const currentPage = document.querySelector('.page.active');
+            const elements = currentPage.querySelectorAll('.searchable');
+            let found = false;
+
+            if(input === "") {
+                elements.forEach(el => el.style.display = "");
+                document.getElementById('no-result').style.display = "none";
+                return;
+            }
+
+            elements.forEach(el => {
+                if(el.innerText.toLowerCase().includes(input)) {
+                    el.style.display = "";
+                    found = true;
+                } else {
+                    el.style.display = "none";
+                }
+            });
+            document.getElementById('no-result').style.display = found ? "none" : "block";
+        }
+
+        // --- 2. Parallel Fast Loading ---
+        function fastInit() {
+            const tasks = [
+                db.ref("berita").once("value"),
+                db.ref("promosi").once("value"),
+                db.ref("profil").once("value"),
+                db.ref("film").once("value")
+            ];
+
+            Promise.all(tasks).then(snapshots => {
+                const newsData = snapshots[0].val();
+                const nContainer = document.getElementById("news-container");
+                if(newsData) {
+                    nContainer.innerHTML = Object.keys(newsData).map(id => createNewsHTML(id, newsData[id])).join('');
+                } else {
+                    nContainer.innerHTML = "<p style='text-align:center;color:var(--gray);padding:20px;'>Belum ada berita.</p>";
+                }
+
+                const promoData = snapshots[1].val();
+                const pContainer = document.getElementById("promo-container");
+                if(promoData) {
+                    pContainer.innerHTML = Object.keys(promoData).map(id => createPromoHTML(id, promoData[id])).join('');
+                }
+
+                const p = snapshots[2].val();
+                if(p) {
+                    document.getElementById("disp-name").innerText = p.nama || "Fathur Rizam";
+                    document.getElementById("disp-bio").innerText = p.bio || "Developer RyzzCV";
+                    document.getElementById("disp-email").innerHTML = `<strong>Email:</strong> ${p.email || 'Belum diatur'}`;
+                }
+
+                const filmData = snapshots[3].val();
+                const fContainer = document.getElementById("film-container");
+                if(filmData) {
+                    fContainer.innerHTML = Object.keys(filmData).map(id => createFilmHTML(id, filmData[id])).join('');
+                } else {
+                    fContainer.innerHTML = "<p style='text-align:center;color:var(--gray);padding:20px;'>Belum ada koleksi film.</p>";
+                }
+            });
+            
+            db.ref("film").on("value", snapshot => {
+                 const filmData = snapshot.val();
+                 const fContainer = document.getElementById("film-container");
+                 if(filmData) {
+                     fContainer.innerHTML = Object.keys(filmData).map(id => createFilmHTML(id, filmData[id])).join('');
+                 }
+            });
+        }
+
+        function createNewsHTML(id, item) {
+            const isLiked = localStorage.getItem('liked_' + id);
+            return `
+                <div class="card glass-panel news-item searchable" id="news-card-${id}">
+                    <div style="height:200px; background: url('${item.img || 'https://via.placeholder.com/600x300'}') center/cover;"></div>
+                    <div style="padding:20px;">
+                        <h3 style="margin:0 0 8px 0; font-size:18px;">${item.judul}</h3>
+                        <small style="color:var(--primary); font-weight:600; font-size:13px;">${item.kategori}</small>
+                    </div>
+                    <div class="news-footer">
+                        <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="handleLike('${id}')">
+                            <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> 
+                            <span id="lcount-${id}">${item.likes || 0}</span>
+                        </button>
+                        <button class="like-btn" onclick="openComments('${id}')">
+                           <i class="fas fa-comment-alt"></i> Diskusi
+                        </button>   
+                    </div>
+                </div>`;
+        }
+
+        function createPromoHTML(id, app) {
+            const appIcon = app.img 
+                ? `<img src="${app.img}" class="app-icon-img" loading="eager">` 
+                : `<div class="app-icon-img" style="background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; font-size:24px;"><i class="${app.icon || 'fas fa-box'}"></i></div>`;
+            return `
+                <div class="card glass-panel promo-item searchable" onclick="showAppDetail('${id}')">
+                    ${appIcon}
+                    <div style="flex:1">
+                        <h3 style="margin:0 0 4px 0; font-size:16px;">${app.nama}</h3>
+                        <small style="color:var(--gray); font-weight:500;">${app.desc ? app.desc.substring(0, 35) : 'Premium App'}...</small>
+                    </div>
+                    <button style="border:none; background:var(--primary-gradient); color:white; padding:8px 16px; border-radius:99px; font-weight:600; font-size:13px; cursor:pointer; box-shadow:0 4px 10px rgba(0,122,255,0.2);">Lihat</button>
+                </div>`;
+        }
+
+        function createFilmHTML(id, film) {
+            const epsCount = film.episodes ? Object.keys(film.episodes).length : 0;
+            return `
+                <div class="card glass-panel promo-item searchable" onclick="showFilmDetail('${id}')">
+                    <img src="${film.img}" class="app-icon-img" onerror="this.src='https://via.placeholder.com/65x65?text=Film'">
+                    <div style="flex:1">
+                        <h3 style="margin:0 0 4px 0; font-size:16px;">${film.judul}</h3>
+                        <small style="color:var(--accent); font-weight:600;"><i class="fas fa-layer-group"></i> ${epsCount} Episode</small>
+                    </div>
+                    <button style="border:none; background:linear-gradient(135deg, #FF3B30, #FF2D55); color:white; padding:10px 16px; border-radius:99px; cursor:pointer; box-shadow:0 4px 10px rgba(255,59,48,0.3);"><i class="fas fa-play"></i></button>
+                </div>`;
+        }
+
+        // --- 3. Interaction Logic ---
+        function handleLike(id) {
+            const isLiked = localStorage.getItem('liked_' + id);
+            const label = document.getElementById(`lcount-${id}`);
+            const btn = document.querySelector(`#news-card-${id} .like-btn`);
+            const ref = db.ref('berita/' + id + '/likes');
+
+            if (isLiked) {
+                label.innerText = (parseInt(label.innerText) - 1);
+                btn.classList.remove('liked');
+                btn.querySelector('i').className = 'far fa-heart';
+                ref.transaction(c => (c || 1) - 1);
+                localStorage.removeItem('liked_' + id);
+            } else {
+                label.innerText = (parseInt(label.innerText) + 1);
+                btn.classList.add('liked');
+                btn.querySelector('i').className = 'fas fa-heart';
+                ref.transaction(c => (c || 0) + 1);
+                localStorage.setItem('liked_' + id, 'true');
+            }
+        }
+
+        function showAppDetail(appId) {
+            db.ref("promosi/" + appId).once("value", (snapshot) => {
+                const app = snapshot.val();
+                if(app) {
+                    const detailIcon = app.img 
+                        ? `<img src="${app.img}" style="width:110px; height:110px; border-radius:24px; object-fit:cover; margin-bottom:15px; box-shadow:0 10px 25px rgba(0,0,0,0.1);" loading="eager">`
+                        : `<div style="width:110px; height:110px; font-size:45px; margin: 0 auto 15px; background:var(--primary); color:white; display:flex; align-items:center; justify-content:center; border-radius:24px;"><i class="${app.icon || 'fas fa-box'}"></i></div>`;
+                    
+                    document.getElementById("detail-content").innerHTML = `
+                        <div style="text-align: center; padding: 20px 0;">
+                            ${detailIcon}
+                            <h2 style="margin:0; font-weight:800;">${app.nama}</h2>
+                            <p style="color:var(--primary); font-weight:700; margin-top:5px; font-size:14px;"><i class="fas fa-certificate"></i> Verified Premium</p>
+                        </div>
+                        <div class="card glass-panel" style="padding:25px;">
+                            <h4 style="margin-top:0; font-size:16px;">Deskripsi</h4>
+                            <p style="line-height:1.7; color:#555; font-size:15px;">${app.desc || 'Deskripsi tidak tersedia.'}</p>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:25px;">
+                                <a href="https://wa.me/6285608906983?text=Halo Fathur, saya ingin pesan ${app.nama}" target="_blank" class="btn-action btn-buy"><i class="fab fa-whatsapp" style="font-size:18px;"></i> Beli</a>
+                                <a href="${app.link || '#'}" target="_blank" class="btn-action btn-dl"><i class="fas fa-cloud-download-alt" style="font-size:18px;"></i> Unduh</a>
+                            </div>
+                        </div>`;
+                    switchPage('details');
+                }
+            });
+        }
+
+        function showFilmDetail(filmId) {
+            db.ref("film/" + filmId).once("value", (snapshot) => {
+                const film = snapshot.val();
+                if(film) {
+                    let episodeHTML = `<div style="text-align:center; padding:30px; color:var(--gray);">Belum ada episode diupload.</div>`;
+                    
+                    if(film.episodes) {
+                        episodeHTML = Object.keys(film.episodes).map(epId => {
+                            const ep = film.episodes[epId];
+                            return `
+                                <div class="card" style="background:rgba(255,255,255,0.7); padding:16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; border-left:4px solid var(--accent); box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                                    <div style="flex:1; padding-right:10px;">
+                                        <h4 style="margin:0; font-size:15px; color:var(--dark);">${ep.judul_episode}</h4>
+                                    </div>
+                                    <a href="${ep.link}" target="_blank" class="btn-action" style="background:linear-gradient(135deg, #FF3B30, #FF2D55); color:white; padding:10px 16px; font-size:13px; border-radius:99px; box-shadow:0 4px 10px rgba(255,59,48,0.2);"><i class="fas fa-play"></i> Play</a>
+                                </div>
+                            `;
+                        }).join('');
+                    }
+
+                    document.getElementById("film-detail-content").innerHTML = `
+                        <div style="text-align:center; padding-bottom:20px;">
+                            <img src="${film.img}" style="border-radius:20px; width:130px; height:130px; object-fit:cover; box-shadow:0 10px 30px rgba(0,0,0,0.15); margin-bottom:15px;" onerror="this.src='https://via.placeholder.com/130?text=Film'">
+                            <h2 style="margin:0; color:var(--dark); font-weight:800;">${film.judul}</h2>
+                        </div>
+                        <div class="glass-panel card" style="padding:25px;">
+                            <h4 style="margin-top:0; border-bottom:1px solid rgba(0,0,0,0.05); padding-bottom:15px; margin-bottom:20px;"><i class="fas fa-list-ul"></i> Daftar Episode</h4>
+                            ${episodeHTML}
+                        </div>`;
+                    switchPage('film-details');
+                }
+            });
+        }
+
+        fastInit();
+
+        window.onclick = function(e) {
+            if (!e.target.closest('.nav-actions') && !e.target.closest('.menu-box')) {
+                document.getElementById('menuBox').classList.remove('active');
+            }
+        }
+        
+        function openComments(id) {
+            const modal = document.getElementById('commentModal');
+            const list = document.getElementById('comment-list');
+            
+            modal.style.display = 'flex'; 
+            list.innerHTML = "<p style='text-align:center; margin-top:30px; color:var(--gray);'>Memuat obrolan...</p>";
+
+            db.ref('komentar/' + id).on('value', (snapshot) => {
+                const data = snapshot.val();
+                list.innerHTML = data ? Object.entries(data).map(([key, c]) => `
+                    <div class="comment-bubble" 
+                         onmousedown="startPress('${id}', '${key}')" onmouseup="endPress()" 
+                         ontouchstart="startPress('${id}', '${key}')" ontouchend="endPress()">
+                        <strong>${c.nama}</strong>
+                        ${c.isi}
+                    </div>`).join('') : "<p style='text-align:center; color:var(--gray); margin-top:30px;'>Belum ada Komentar, jadilah yang pertama!</p>";
+                
+                setTimeout(() => { list.scrollTop = list.scrollHeight; }, 100);
+            });
+
+            document.getElementById('sendCommentBtn').onclick = () => {
+                const btn = document.getElementById('sendCommentBtn');
+                btn.style.transform = "scale(0.9)";
+                setTimeout(() => btn.style.transform = "scale(1)", 150);
+
+                const nama = document.getElementById('username').value;
+                const isi = document.getElementById('commentText').value;
+                if(nama && isi) {
+                    db.ref('komentar/' + id).push({ nama: nama, isi: isi });
+                    document.getElementById('commentText').value = '';
+                } else {
+                    alert("Harap lengkapi Nama dan Komentar Anda.");
+                }
+            };
+        }
+        
+        let pressTimer;
+        function startPress(newsId, commentKey) {
+            pressTimer = setTimeout(() => {
+                if (confirm("Apakah Anda yakin ingin menghapus pesan ini?")) {
+                    db.ref('komentar/' + newsId + '/' + commentKey).remove();
+                }
+            }, 800);
+        }
+
+        function endPress() {
+            clearTimeout(pressTimer);
+        }
+
+        // --- 4. Fitur AI Customer Service ---
+        function toggleAIChat() {
+            const modal = document.getElementById('aiChatModal');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                modal.style.display = 'flex';
+                setTimeout(() => document.getElementById('aiInput').focus(), 100);
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Izinkan klik 'Enter' untuk mengirim pesan AI
+        document.getElementById('aiInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendAIMessage();
+            }
+        });
+
+        async function sendAIMessage() {
+            const inputField = document.getElementById('aiInput');
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            const chatList = document.getElementById('ai-chat-list');
+            
+            // Tambahkan Pesan User
+            chatList.innerHTML += `<div class="ai-bubble user">${message}</div>`;
+            inputField.value = '';
+            chatList.scrollTop = chatList.scrollHeight;
+
+            // Tambahkan Indikator Loading
+            const loadingId = 'loading-' + Date.now();
+            chatList.innerHTML += `<div id="${loadingId}" class="ai-bubble bot"><i class="fas fa-circle-notch fa-spin"></i> Ryzz AI sedang memikirkan jawaban...</div>`;
+            chatList.scrollTop = chatList.scrollHeight;
+
+            try {
+                // Konfigurasi Fetch sesuai dengan model dan API Key yang Anda minta (Format mirip OpenRouter)
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer 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",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": "openai/gpt-oss-120b",
+                        "messages": [
+                            {
+                                "role": "system", 
+                                "content": "Kamu adalah Customer Service AI bernama 'Ryzz AI' dari RyzzCyber. RyzzCyber adalah tempat mendownload aplikasi modifikasi premium dan koleksi film. Selalu jawab dengan bahasa Indonesia yang santai, sopan, profesional, tidak alay, dan membantu. Gunakan format teks yang mudah dibaca."
+                            },
+                            {
+                                "role": "user", 
+                                "content": message
+                            }
+                        ]
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Hapus tulisan loading
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) loadingElement.remove();
+
+                if (data.choices && data.choices.length > 0) {
+                    const aiResponse = data.choices[0].message.content;
+                    chatList.innerHTML += `<div class="ai-bubble bot">${aiResponse}</div>`;
+                } else {
+                    throw new Error("Respon AI Kosong.");
+                }
+            } catch (error) {
+                const loadingElement = document.getElementById(loadingId);
+                if (loadingElement) loadingElement.remove();
+                chatList.innerHTML += `<div class="ai-bubble bot" style="color:#FF3B30;"><i class="fas fa-exclamation-triangle"></i> Maaf, koneksi ke server AI sedang terganggu. Coba lagi beberapa saat ya.</div>`;
+                console.error("AI Error: ", error);
+            }
+            
+            // Auto scroll ke bawah
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+    </script>
+</body>
+</html>
